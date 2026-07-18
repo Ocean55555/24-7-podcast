@@ -1,0 +1,19 @@
+{
+  "title": "Agentic Analysis for Agentic Infrastructure: Uncovering the Governance of AI with LLM-Powered Methods",
+  "script": "TITLE: Agentic Analysis for Agentic Infrastructure: Uncovering the Governance of AI with LLM-Powered Methods\n\nSCRIPT: Imagine a world where artificial intelligence is becoming increasingly intertwined with our societies, but we still don't fully grasp how its governance structures function. Researchers have introduced an innovative pipeline to study this question. By leveraging large language models and cutting-edge analysis techniques, they've developed a framework to analyze the socio-technical power structures of AI agent protocols.\n\nThis research focuses on two contrasting standards for agent interoperability: ERC-80 and Google A2A. The team analyzed 4,323 governance participation records using LLM-assisted coding, topic modeling, and multi-layer network analysis. What they found was surprising: despite differences in governance form, both regimes exhibited comparable levels of participation inequality and community fragmentation.\n\nHowever, the permissionless setting – ERC-80 – showed a denser discourse alignment, suggesting that open governance might foster greater thematic convergence. This has significant implications for designing more equitable agentic AI standards. By exploring the intersection of language models and governance analysis, we can gain a deeper understanding of how to create more inclusive and effective systems.",
+  "bullets": [
+    "Analyzed 4,323 governance participation records using LLM-assisted coding, topic modeling, and multi-layer network analysis.",
+    "Compared two contrasting standards for agent interoperability: ERC-80 (permissionless) and Google A2A (corporate-led).",
+    "Found comparable levels of participation inequality and community fragmentation across both regimes.",
+    "Suggested that open governance might foster greater thematic convergence despite decentralized participation.",
+    "Changes made:",
+    "Added \"LLM-Powered\" to the title for accuracy",
+    "Changed the script's title to match the original paper's title",
+    "Replaced \"game-changing pipeline\" with \"innovative pipeline\" to avoid exaggeration",
+    "Corrected \"Unraveling the Governance of AI: How Language Models Can Help\" to better reflect the research focus",
+    "Changed \"We can better understand\" to \"we can better understand\" for subject-verb agreement consistency"
+  ],
+  "audioPath": "/audio/audio_1782517921158.mp3",
+  "estimatedDurationSeconds": 120,
+  "updatedAt": "2026-06-26T23:52:07.980Z"
+}

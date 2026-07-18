@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>247Living — OWASP Live</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #121212;
+    --s1:       #181818;
+    --s2:       #242424;
+    --s3:       #2a2a2a;
+    --green:    #1db954;
+    --green-h:  #1ed760;
+    --text:     #ffffff;
+    --text-2:   #b3b3b3;
+    --text-3:   #999999;
+    --live:     #f43f5e;
+    --font:     'Inter', 'Segoe UI', system-ui, sans-serif;
+  }
+
+  html { overflow: hidden; }
+
+  body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .scale-wrapper {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1920px;
+    height: 1080px;
+    transform-origin: 0 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Top nav bar ── */
+  .header {
+    flex-shrink: 0;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    background: rgba(18,18,18,0.95);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .header-logo {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.03em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .header-logo-dot {
+    width: 28px;
+    height: 28px;
+    background: var(--green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 900;
+    color: #000;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(244,63,94,0.15);
+    border: 1px solid rgba(244,63,94,0.4);
+    border-radius: 999px;
+    padding: 8px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--live);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--live);
+    animation: blink 1.6s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.2; }
+  }
+
+  .clock {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Main content area ── */
+  .content-area {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 3fr 2fr 2fr;
+    min-height: 0;
+  }
+
+  /* ── Now playing panel ── */
+  .main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px 56px;
+    gap: 0;
+    background: linear-gradient(160deg, #1a1a2e 0%, #121212 60%);
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .now-playing-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 40px;
+    margin-bottom: 32px;
+  }
+
+  /* Album art */
+  .album-art {
+    flex-shrink: 0;
+    width: 180px;
+    height: 180px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #1a1a3e 0%, #0d1a0d 50%, #1a0d1a 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 32px 64px rgba(0,0,0,0.6);
+    gap: 8px;
+  }
+
+  .album-owasp {
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--green);
+    letter-spacing: -0.02em;
+  }
+
+  .album-sub {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Track info */
+  .track-info {
+    flex: 1;
+    min-width: 0;
+    padding-bottom: 8px;
+  }
+
+  .track-type {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .title {
+    font-size: 40px;
+    font-weight: 900;
+    line-height: 1.15;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .host-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .host-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    color: #000;
+  }
+
+  .host-name {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-2);
+  }
+
+  .host-name strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  /* ── Sidebar — Key Points ── */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid rgba(255,255,255,0.08);
+    background: var(--s1);
+    padding: 36px 32px;
+    min-height: 0;
+  }
+
+  .panel-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  .bullets {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .bullet {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    opacity: 0;
+    transform: translateX(12px);
+    transition: opacity 0.4s ease, transform 0.4s ease, background 0.2s;
+  }
+
+  .bullet.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .bullet:hover { background: var(--s2); }
+
+  .bullet-num {
+    flex-shrink: 0;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--green);
+    min-width: 28px;
+    line-height: 1.4;
+  }
+
+  .bullet-text {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--text);
+  }
+
+  /* ── Subtitles — Lyrics style ── */
+  .subtitles {
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid rgba(255,255,255,0.08);
+    background: #141414;
+    padding: 36px 32px;
+    min-height: 0;
+  }
+
+  .subtitles-scroll {
+    flex: 1;
+    overflow-y: scroll;
+    min-height: 0;
+    scroll-behavior: auto;
+  }
+
+  .subtitles-text {
+    font-size: 21px;
+    font-weight: 400;
+    line-height: 2.0;
+    color: var(--text-2);
+  }
+
+  /* Thin dark scrollbars for both panels */
+  .bullets::-webkit-scrollbar,
+  .subtitles-scroll::-webkit-scrollbar { width: 4px; }
+  .bullets::-webkit-scrollbar-track,
+  .subtitles-scroll::-webkit-scrollbar-track { background: transparent; }
+  .bullets::-webkit-scrollbar-thumb,
+  .subtitles-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.18);
+    border-radius: 4px;
+  }
+  .bullets::-webkit-scrollbar-thumb:hover,
+  .subtitles-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.35); }
+
+  /* ── Player bar ── */
+  .player-bar {
+    flex-shrink: 0;
+    height: 90px;
+    background: var(--s2);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    padding: 0 32px;
+    gap: 16px;
+  }
+
+  .player-track {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .player-thumb {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #1db954 0%, #0d4a27 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 900;
+    color: rgba(0,0,0,0.8);
+    letter-spacing: 0.05em;
+  }
+
+  .player-info { min-width: 0; }
+
+  .player-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .player-host {
+    font-size: 14px;
+    color: var(--text-2);
+    margin-top: 3px;
+  }
+
+  .player-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── Floating playback controls — center bottom ── */
+  .playback-controls {
+    position: absolute;
+    bottom: 104px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(20,20,20,0.94);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 999px;
+    padding: 12px 36px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+  }
+
+  .ctrl-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-2);
+    transition: color 0.15s, transform 0.12s;
+    padding: 4px;
+    line-height: 1;
+  }
+
+  .ctrl-btn:hover { color: var(--text); transform: scale(1.15); }
+  .ctrl-btn:active { transform: scale(0.90); }
+  .ctrl-btn svg { width: 32px; height: 32px; fill: currentColor; }
+
+  .ctrl-main {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--text);
+    color: #000;
+    flex-shrink: 0;
+  }
+
+  .ctrl-main:hover { background: var(--green-h); color: #000; transform: scale(1.08); }
+  .ctrl-main svg { width: 26px; height: 26px; }
+
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--s3);
+    border-radius: 999px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 999px;
+    animation: progress-play var(--progress-duration, 60s) linear forwards;
+  }
+
+  @keyframes progress-play {
+    0%   { width: 0%; }
+    100% { width: 100%; }
+  }
+
+  .ticker-track {
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .ticker-inner {
+    display: flex;
+    white-space: nowrap;
+    animation: scroll-left 80s linear infinite;
+  }
+
+  .ticker-item {
+    font-size: 14px;
+    color: var(--text-2);
+    padding: 0 40px;
+  }
+
+  .ticker-item span { color: var(--green); font-weight: 600; margin-right: 6px; }
+
+  @keyframes scroll-left {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .player-right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .owasp-tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: #000;
+    background: var(--green);
+    border-radius: 4px;
+    padding: 4px 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ── Audio gate ── */
+  #audio-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.85);
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+  }
+
+  #audio-gate.hidden { display: none; }
+
+  .gate-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .gate-icon {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: #000;
+    animation: blink 1.6s ease-in-out infinite;
+    padding-left: 6px;
+  }
+
+  .gate-text {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-2);
+  }
+</style>
+</head>
+<body>
+<div class="scale-wrapper">
+
+  <header class="header">
+    <div class="header-logo">
+      <div class="header-logo-dot">O</div>
+      247Living
+    </div>
+    <div class="header-right">
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        Live
+      </div>
+      <div class="clock" id="clock">00:00:00 UTC</div>
+    </div>
+  </header>
+
+  <div class="content-area">
+
+    <main class="main">
+      <div class="now-playing-row">
+        <div class="album-art">
+          <div class="album-owasp">OWASP</div>
+          <div class="album-sub">Security Live</div>
+        </div>
+        <div class="track-info">
+          <div class="track-type">Now Broadcasting</div>
+          <h1 class="title" id="title">Loading...</h1>
+          <div class="host-row">
+            <div class="host-avatar">K</div>
+            <div class="host-name"><strong>Kai</strong> · OWASP AppSec Analyst</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="sidebar">
+      <div class="panel-label">Key Points</div>
+      <div class="bullets" id="bullets"></div>
+    </aside>
+
+    <aside class="subtitles">
+      <div class="panel-label">Transcript</div>
+      <div class="subtitles-scroll">
+        <div class="subtitles-text" id="subtitles-text">Loading...</div>
+      </div>
+    </aside>
+
+  </div>
+
+  <div class="player-bar">
+    <div class="player-track">
+      <div class="player-thumb">OW</div>
+      <div class="player-info">
+        <div class="player-title" id="player-title">Loading...</div>
+        <div class="player-host">Kai · OWASP AppSec</div>
+      </div>
+    </div>
+
+    <div class="player-center">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="ticker-track">
+        <div class="ticker-inner">
+          <span class="ticker-item"><span>▶</span> OWASP Top 10 · A01 Broken Access Control · A02 Cryptographic Failures · A03 Injection · A04 Insecure Design · A05 Security Misconfiguration</span>
+          <span class="ticker-item"><span>▶</span> A06 Vulnerable Components · A07 Auth Failures · A08 Integrity Failures · A09 Logging Failures · A10 SSRF · owasp.org</span>
+          <span class="ticker-item"><span>▶</span> OWASP Top 10 · A01 Broken Access Control · A02 Cryptographic Failures · A03 Injection · A04 Insecure Design · A05 Security Misconfiguration</span>
+          <span class="ticker-item"><span>▶</span> A06 Vulnerable Components · A07 Auth Failures · A08 Integrity Failures · A09 Logging Failures · A10 SSRF · owasp.org</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="player-right">
+      <div class="owasp-tag">OWASP</div>
+    </div>
+  </div>
+
+  <!-- Floating playback controls — center bottom -->
+  <div class="playback-controls">
+    <button class="ctrl-btn" onclick="prevEpisode()" title="Previous">
+      <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+    </button>
+    <button class="ctrl-btn ctrl-main" id="pause-btn" onclick="togglePause()" title="Pause / Play">
+      <svg id="pause-icon" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      <svg id="play-icon"  viewBox="0 0 24 24" style="display:none"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <button class="ctrl-btn" onclick="nextEpisode()" title="Next">
+      <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
+    </button>
+  </div>
+
+</div>
+
+<audio id="player" onended="fetch('/api/next',{method:'POST'}).catch(()=>{})"></audio>
+
+<div id="audio-gate" onclick="unlockAudio()">
+  <div class="gate-inner">
+    <div class="gate-icon">▶</div>
+    <div class="gate-text">Click to start</div>
+  </div>
+</div>
+
+<script>
+  function unlockAudio() {
+    document.getElementById('audio-gate').classList.add('hidden');
+    const player = document.getElementById('player');
+    if (player.src) player.play().catch(() => {});
+  }
+
+  function scaleToFit() {
+    const scale = Math.max(window.innerWidth / 1920, window.innerHeight / 1080);
+    const offsetX = (window.innerWidth  - 1920 * scale) / 2;
+    const offsetY = (window.innerHeight - 1080 * scale) / 2;
+    document.querySelector('.scale-wrapper').style.transform =
+      `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+  }
+  window.addEventListener('resize', scaleToFit);
+  scaleToFit();
+
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getUTCHours()).padStart(2, '0');
+    const m = String(now.getUTCMinutes()).padStart(2, '0');
+    const s = String(now.getUTCSeconds()).padStart(2, '0');
+    document.getElementById('clock').textContent = `${h}:${m}:${s} UTC`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  let lastTitle = '';
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderBullets(bullets) {
+    const container = document.getElementById('bullets');
+    container.innerHTML = '';
+    bullets.forEach((text, i) => {
+      const el = document.createElement('div');
+      el.className = 'bullet';
+      el.innerHTML = `<div class="bullet-num">${i + 1}</div><div class="bullet-text">${escapeHtml(text)}</div>`;
+      container.appendChild(el);
+      setTimeout(() => el.classList.add('visible'), i * 120);
+    });
+  }
+
+  function renderSubtitles(text) {
+    document.getElementById('subtitles-text').textContent = text;
+    document.querySelector('.subtitles-scroll').scrollTop = 0;
+  }
+
+  function resetTranscript() {
+    document.querySelector('.subtitles-scroll').scrollTop = 0;
+  }
+
+  function resetProgress(durationSeconds) {
+    const fill = document.getElementById('progress-fill');
+    fill.style.animation = 'none';
+    fill.offsetHeight;
+    fill.style.animation = `progress-play ${durationSeconds}s linear forwards`;
+  }
+
+  // Track src ourselves — player.src returns an absolute URL so direct
+  // comparison with a relative path always fails.
+  let currentAudioSrc = '';
+  let isPaused = false;
+
+  function setPlayIcons(playing) {
+    document.getElementById('pause-icon').style.display = playing ? '' : 'none';
+    document.getElementById('play-icon').style.display  = playing ? 'none' : '';
+  }
+
+  function playAudio(src, duration) {
+    const player = document.getElementById('player');
+    if (currentAudioSrc !== src) {
+      currentAudioSrc = src;
+      player.src = src;
+      // Do NOT call player.load() here — setting src already starts loading.
+      // Calling load() then play() immediately causes Chrome to reject play()
+      // with AbortError: "interrupted by a new load request".
+      resetTranscript();
+    }
+    const gateHidden = document.getElementById('audio-gate').classList.contains('hidden');
+    if (gateHidden) player.play().catch(e => console.warn('[audio] play failed:', e.message));
+    if (duration) resetProgress(duration);
+  }
+
+  function togglePause() {
+    const player = document.getElementById('player');
+    if (isPaused) {
+      player.play().catch(e => console.warn('[pause] resume failed:', e.message));
+      isPaused = false;
+    } else {
+      player.pause();
+      isPaused = true;
+    }
+    setPlayIcons(!isPaused);
+  }
+
+  async function nextEpisode() {
+    const player = document.getElementById('player');
+    player.pause();
+    isPaused = false;
+    setPlayIcons(true);
+    resetTranscript();
+    await fetch('/api/next', { method: 'POST' }).catch(() => {});
+  }
+
+  async function prevEpisode() {
+    let data;
+    try {
+      const res = await fetch('/api/prev', { method: 'POST' });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        console.warn('[prev] server error:', body.error || res.status);
+        return;
+      }
+      data = await res.json();
+    } catch (e) {
+      console.warn('[prev] network error:', e.message);
+      return;
+    }
+
+    if (!data.audioUrl) {
+      console.warn('[prev] response missing audioUrl', data);
+      return;
+    }
+
+    // Update all UI to the previous episode before touching audio.
+    isPaused = false;
+    setPlayIcons(true);
+
+    // Title
+    document.getElementById('title').textContent = data.title;
+    document.getElementById('player-title').textContent = data.title;
+    // Tell pollTopic the "current" title so it doesn't immediately re-render
+    // with episode N when it next fires.
+    lastTitle = data.title;
+
+    // Key points
+    renderBullets(data.bullets || []);
+
+    // Transcript — renderSubtitles handles both text update and scroll reset
+    renderSubtitles(data.script || '');
+
+    // Audio
+    const player = document.getElementById('player');
+    currentAudioSrc = data.audioUrl;
+    player.src = data.audioUrl;
+    player.currentTime = 0;
+    player.play()
+      .then(() => console.log('[prev] playing:', data.title))
+      .catch(e => console.error('[prev] play() failed:', e.message));
+  }
+
+  async function pollTopic() {
+    try {
+      const res = await fetch('/api/current-topic');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.title !== lastTitle) {
+        lastTitle = data.title;
+        document.getElementById('title').textContent = data.title;
+        document.getElementById('player-title').textContent = data.title;
+        renderBullets(data.bullets || []);
+        renderSubtitles(data.script || '');
+        if (data.audioPath) playAudio(data.audioPath, data.estimatedDurationSeconds);
+      }
+    } catch (_) {}
+  }
+
+  async function pollPlayStatus() {
+    try {
+      const res = await fetch('/api/play-status');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.audioUrl) playAudio(data.audioUrl);
+    } catch (_) {}
+  }
+
+  setInterval(pollTopic, 2000);
+  setInterval(pollPlayStatus, 1000);
+  pollTopic();
+</script>
+</body>
+</html>

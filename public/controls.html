@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>24/7 Auto Podcast</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #070d1a;
+    color: #e8f4f8;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    max-width: 720px;
+  }
+
+  h1 {
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    color: #00f5ff;
+    letter-spacing: 0.15em;
+    text-shadow: 0 0 10px #00f5ff;
+  }
+
+  .card {
+    background: #0d1b2a;
+    border: 1px solid #ffffff11;
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .section-label {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #39ff14;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  /* Now playing */
+  .now-playing-title {
+    font-size: 15px;
+    color: #e8f4f8;
+    line-height: 1.4;
+  }
+
+  /* Custom topic form */
+  .topic-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  textarea {
+    width: 100%;
+    background: #070d1a;
+    border: 1px solid #00f5ff44;
+    border-radius: 6px;
+    color: #e8f4f8;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    padding: 12px;
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  textarea:focus { border-color: #00f5ff99; }
+  textarea::placeholder { color: #8899aa; }
+
+  .btn {
+    align-self: flex-start;
+    padding: 10px 22px;
+    background: #0d2233;
+    border: 1px solid #00f5ff66;
+    border-radius: 6px;
+    color: #00f5ff;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+
+  .btn:hover { background: #00f5ff22; box-shadow: 0 0 12px #00f5ff33; }
+  .btn:active { background: #00f5ff11; }
+
+  /* Pending topics */
+  .pending-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .pending-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #070d1a;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #b0c8d8;
+  }
+
+  .pending-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #39ff14;
+    flex-shrink: 0;
+    box-shadow: 0 0 4px #39ff14;
+  }
+
+  .empty-note {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #8899aa;
+    padding: 4px 0;
+  }
+
+  /* Episode list */
+  .episode-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .episode-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #070d1a;
+    border: 1px solid #ffffff08;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .episode-item:hover { border-color: #00f5ff55; background: #0d2233; }
+  .episode-item:active { background: #00f5ff11; }
+
+  .ep-index {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #8899aa;
+    min-width: 24px;
+  }
+
+  .ep-title {
+    flex: 1;
+    font-size: 13px;
+    color: #e8f4f8;
+    line-height: 1.4;
+  }
+
+  .ep-time {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #8899aa;
+    white-space: nowrap;
+  }
+
+  .ep-play {
+    font-size: 14px;
+    color: #00f5ff;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .episode-item:hover .ep-play { opacity: 1; }
+
+  #status {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #39ff14;
+    min-height: 18px;
+  }
+
+  /* Text input (custom channel) */
+  input[type="text"] {
+    width: 100%;
+    background: #070d1a;
+    border: 1px solid #00f5ff44;
+    border-radius: 6px;
+    color: #e8f4f8;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type="text"]:focus { border-color: #00f5ff99; }
+  input[type="text"]::placeholder { color: #8899aa; }
+
+  /* Channel switcher */
+  .channel-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .channel-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: #070d1a;
+    border: 1px solid #ffffff08;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    text-align: left;
+    width: 100%;
+    color: inherit;
+    font-family: inherit;
+  }
+
+  .channel-btn:hover { border-color: #00f5ff55; background: #0d2233; }
+
+  .channel-btn.active {
+    border-color: #39ff1466;
+    background: #0a1f0a;
+  }
+
+  .channel-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #8899aa;
+    flex-shrink: 0;
+  }
+
+  .channel-btn.active .channel-dot {
+    background: #39ff14;
+    box-shadow: 0 0 6px #39ff14;
+  }
+
+  .channel-info { flex: 1; }
+
+  .channel-name {
+    font-size: 14px;
+    color: #e8f4f8;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .channel-host {
+    font-size: 12px;
+    color: #8899aa;
+  }
+
+  .channel-active-tag {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: #39ff14;
+    letter-spacing: 0.1em;
+    display: none;
+  }
+
+  .channel-btn.active .channel-active-tag { display: block; }
+</style>
+</head>
+<body>
+
+<h1>// 24/7 AUTO PODCAST</h1>
+
+<!-- Custom channel -->
+<div class="card">
+  <div class="section-label">// Custom Channel</div>
+  <div class="topic-form">
+    <input type="text" id="custom-channel-input"
+      placeholder="e.g. quantum computing, Formula 1, climate policy…" />
+    <button class="btn" onclick="launchCustomChannel()">▶ Launch Channel</button>
+  </div>
+</div>
+
+<!-- Channel switcher -->
+<div class="card">
+  <div class="section-label">// Channel</div>
+  <div class="channel-grid" id="channel-grid">
+    <div class="empty-note">Loading channels...</div>
+  </div>
+</div>
+
+<!-- Now playing -->
+<div class="card">
+  <div class="section-label">// Now Playing</div>
+  <div class="now-playing-title" id="now-playing-title">Loading...</div>
+</div>
+
+<!-- Custom topic input -->
+<div class="card">
+  <div class="section-label">// Queue a Custom Topic</div>
+  <div class="topic-form">
+    <textarea id="topic-input" placeholder="Type a cybersecurity topic to cover next&#10;e.g. &quot;Ransomware attacks targeting hospitals in 2025&quot;"></textarea>
+    <button class="btn" onclick="queueTopic()">+ Queue Topic</button>
+  </div>
+</div>
+
+<!-- Pending custom topics -->
+<div class="card">
+  <div class="section-label">// Pending Custom Topics</div>
+  <div class="pending-list" id="pending-list">
+    <div class="empty-note">No custom topics queued</div>
+  </div>
+</div>
+
+<!-- Episode history -->
+<div class="card">
+  <div class="section-label">// Episode History — click to play</div>
+  <div class="episode-list" id="episode-list">
+    <div class="empty-note">No episodes yet</div>
+  </div>
+</div>
+
+<div id="status"></div>
+
+<script>
+  function setStatus(msg) {
+    document.getElementById('status').textContent = msg;
+    setTimeout(() => { document.getElementById('status').textContent = ''; }, 2500);
+  }
+
+  function timeAgo(iso) {
+    const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+    if (diff < 60) return `${diff}s ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    return `${Math.floor(diff / 3600)}h ago`;
+  }
+
+  async function queueTopic() {
+    const input = document.getElementById('topic-input');
+    const topic = input.value.trim();
+    if (!topic) return;
+    try {
+      const res = await fetch('/api/add-topic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic }),
+      });
+      if (res.ok) {
+        input.value = '';
+        setStatus('✓ Topic queued — will play next');
+        refresh();
+      } else {
+        setStatus('Error adding topic');
+      }
+    } catch (_) { setStatus('Error — server not responding'); }
+  }
+
+  // Allow Ctrl+Enter to submit
+  document.getElementById('topic-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) queueTopic();
+  });
+
+  async function playEpisode(audioUrl, title) {
+    try {
+      const res = await fetch('/api/play-episode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audioUrl }),
+      });
+      if (res.ok) setStatus(`▶ Playing: ${title}`);
+      else setStatus('Error — server not responding');
+    } catch (_) { setStatus('Error — is the server running?'); }
+  }
+
+  function renderPending(topics) {
+    const el = document.getElementById('pending-list');
+    if (!topics.length) {
+      el.innerHTML = '<div class="empty-note">No custom topics queued</div>';
+      return;
+    }
+    el.innerHTML = topics.map(t => `
+      <div class="pending-item">
+        <div class="pending-dot"></div>
+        <span>${escHtml(t)}</span>
+      </div>
+    `).join('');
+  }
+
+  function renderEpisodes(episodes) {
+    const el = document.getElementById('episode-list');
+    if (!episodes.length) {
+      el.innerHTML = '<div class="empty-note">No episodes yet</div>';
+      return;
+    }
+    el.innerHTML = episodes.map((ep, i) => `
+      <div class="episode-item" onclick="playEpisode('${escHtml(ep.audioUrl)}', ${JSON.stringify(ep.title)})">
+        <span class="ep-index">${String(i + 1).padStart(2, '0')}</span>
+        <span class="ep-title">${escHtml(ep.title)}</span>
+        <span class="ep-time">${timeAgo(ep.updatedAt)}</span>
+        <span class="ep-play">▶</span>
+      </div>
+    `).join('');
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  let activeChannelId = '';
+
+  function renderChannels(channels, activeId, activeChannel) {
+    activeChannelId = activeId;
+    const el = document.getElementById('channel-grid');
+
+    // If a custom channel is active, prepend it to the list
+    const list = activeId === 'custom'
+      ? [activeChannel, ...channels]
+      : channels;
+
+    el.innerHTML = list.map(ch => {
+      const isActive = ch.id === activeId;
+      const isCustom = ch.id === 'custom';
+      const onclick = isCustom ? '' : `onclick="switchChannel('${escHtml(ch.id)}')"`;
+      return `
+        <button class="channel-btn ${isActive ? 'active' : ''}" ${onclick}
+          style="${isCustom ? 'cursor:default' : ''}">
+          <div class="channel-dot"></div>
+          <div class="channel-info">
+            <div class="channel-name">${escHtml(ch.name)}</div>
+            <div class="channel-host">Host: ${escHtml(ch.hostName)}</div>
+          </div>
+          <div class="channel-active-tag">● LIVE</div>
+        </button>`;
+    }).join('');
+  }
+
+  async function switchChannel(id) {
+    if (id === activeChannelId) return;
+    try {
+      const res = await fetch('/api/channel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setStatus(`✓ Switched to ${data.channel.name} — queue cleared`);
+        refreshChannels();
+      } else {
+        setStatus(`Error: ${data.error}`);
+      }
+    } catch (_) { setStatus('Error — server not responding'); }
+  }
+
+  async function launchCustomChannel() {
+    const input = document.getElementById('custom-channel-input');
+    const topic = input.value.trim();
+    if (!topic) return;
+    try {
+      const res = await fetch('/api/custom-channel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        input.value = '';
+        setStatus(`✓ Launched: ${data.channel.name}`);
+        refreshChannels();
+      } else {
+        setStatus(`Error: ${data.error}`);
+      }
+    } catch (_) { setStatus('Error — server not responding'); }
+  }
+
+  document.getElementById('custom-channel-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') launchCustomChannel();
+  });
+
+  async function refreshChannels() {
+    try {
+      const res = await fetch('/api/channels');
+      if (res.ok) {
+        const data = await res.json();
+        renderChannels(data.channels, data.active, data.activeChannel);
+      }
+    } catch (_) {}
+  }
+
+  async function refresh() {
+    try {
+      const [topicRes, episodesRes, pendingRes] = await Promise.all([
+        fetch('/api/current-topic'),
+        fetch('/api/episodes'),
+        fetch('/api/custom-topics'),
+      ]);
+      if (topicRes.ok) {
+        const t = await topicRes.json();
+        document.getElementById('now-playing-title').textContent = t.title || '—';
+      }
+      if (episodesRes.ok) renderEpisodes(await episodesRes.json());
+      if (pendingRes.ok) renderPending(await pendingRes.json());
+    } catch (_) {}
+  }
+
+  setInterval(refresh, 3000);
+  setInterval(refreshChannels, 10000);
+  refreshChannels();
+  refresh();
+</script>
+</body>
+</html>
