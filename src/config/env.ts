@@ -28,4 +28,8 @@ export const config = {
   EPISODE_DB_PATH: path.resolve(optional('EPISODE_DB_PATH', './data/episodes.json')),
   AUDIO_OUTPUT_DIR: path.resolve(optional('AUDIO_OUTPUT_DIR', './public/audio')),
   AUDIO_KEEP_COUNT: parseInt(optional('AUDIO_KEEP_COUNT', '50'), 10),
+
+  DISCORD_BOT_TOKEN: optional('DISCORD_BOT_TOKEN', ''),
+  DISCORD_GUILD_ID: optional('DISCORD_GUILD_ID', ''),
+  DISCORD_VOICE_CHANNEL_ID: optional('DISCORD_VOICE_CHANNEL_ID', ''),
 } as const;

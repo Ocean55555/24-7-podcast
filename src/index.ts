@@ -13,6 +13,9 @@ import { synthesize } from './tts/ttsService';
 import { updateScene, sceneRouter } from './renderer/sceneRenderer';
 import { waitForNext } from './stream/playbackController';
 import { episodeQueue, MAX_QUEUE } from './stream/episodeQueue';
+import { isPipelinePaused } from './stream/pipelineState';
+import { initDiscordVoice, isDiscordEnabled, playInVoiceChannel } from './discord/voiceStreamer';
+import { registerCommands, listenForCommands } from './discord/commands';
 
 const app = express();
 app.use(express.json());
@@ -67,6 +70,10 @@ async function producerLoop(): Promise<void> {
   logger.info('[producer] Started');
   while (true) {
     try {
+      if (isPipelinePaused()) {
+        await sleep(2_000);
+        continue;
+      }
       if (episodeQueue.length >= MAX_QUEUE) {
         await sleep(5_000);
         continue;
@@ -86,6 +93,10 @@ async function producerLoop(): Promise<void> {
 async function consumerLoop(): Promise<void> {
   logger.info('[consumer] Started — waiting for first episode...');
   while (true) {
+    if (isPipelinePaused()) {
+      await sleep(2_000);
+      continue;
+    }
     if (episodeQueue.length === 0) {
       await sleep(2_000);
       continue;
@@ -100,10 +111,20 @@ async function consumerLoop(): Promise<void> {
     );
 
     logger.info(`[consumer] Playing "${episode.script.title}" — ${episodeQueue.length} in queue`);
-    await Promise.race([
-      waitForNext(),
-      sleep(fallback * 1000),
-    ]);
+
+    if (isDiscordEnabled()) {
+      try {
+        await playInVoiceChannel(episode.tts.audioPath);
+      } catch (err) {
+        logger.error(`[discord] Playback error: ${(err as Error).message}`);
+        await sleep(fallback * 1000);
+      }
+    } else {
+      await Promise.race([
+        waitForNext(),
+        sleep(fallback * 1000),
+      ]);
+    }
   }
 }
 
@@ -112,4 +133,16 @@ app.listen(config.SCENE_PORT, () => {
   logger.info(`Controls     → http://localhost:${config.SCENE_PORT}/controls.html`);
   void producerLoop();
   void consumerLoop();
+
+  if (isDiscordEnabled()) {
+    initDiscordVoice()
+      .then(async () => {
+        await registerCommands();
+        listenForCommands();
+        logger.info('[discord] Voice streaming active');
+      })
+      .catch(err => logger.error(`[discord] Failed to initialize: ${(err as Error).message}`));
+  } else {
+    logger.info('[discord] Not configured — set DISCORD_BOT_TOKEN/GUILD_ID/VOICE_CHANNEL_ID in .env to enable');
+  }
 });
