@@ -11,9 +11,14 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
+    "@discordjs/opus": "^0.10.0",
+    "@discordjs/voice": "^0.19.2",
     "axios": "^1.7.0",
+    "discord.js": "^14.27.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "ffmpeg-static": "^5.3.0",
+    "libsodium-wrappers": "^0.8.4",
     "rss-parser": "^3.13.0",
     "winston": "^3.13.0"
   },
@@ -23,5 +28,10 @@
     "nodemon": "^3.1.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.0"
+  },
+  "allowScripts": {
+    "@discordjs/opus@0.10.0": true,
+    "ffmpeg-static@5.3.0": true,
+    "fsevents@2.3.3": true
   }
 }
